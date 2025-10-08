@@ -103,3 +103,29 @@ module "ampls_scoped_service" {
   # properties to scope monitoring workload or downstream settings
   tags = var.tags
 }
+
+###############################################
+# diagnostic_to_eventhub.tf
+resource "azurerm_monitor_diagnostic_setting" "la_to_eh" {
+  name               = "${var.prefix}-${var.environment}-la-to-eh"
+  target_resource_id = module.log_analytics_workspace.id
+  eventhub_name      = module.eventhub.name
+  eventhub_namespace_id = module.eventhub_namespace.id
+  log {
+    category = "Administrative"
+    enabled  = true
+    retention_policy {
+      enabled = false
+      days    = 0
+    }
+  }
+  metric {
+    category = "AllMetrics"
+    enabled  = true
+    retention_policy {
+      enabled = false
+      days    = 0
+    }
+  }
+  depends_on = [module.eventhub, module.eventhub_namespace]
+}
